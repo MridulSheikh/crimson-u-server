@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors")
 require('dotenv').config()
 const {MongoClient} = require('mongodb');
+const { query } = require('express');
 const ObjectId = require('mongodb').ObjectId;
 const port = process.env.PORT || 5000;
 
@@ -150,7 +151,31 @@ try{
     const ratting = await RattingCollection.insertOne(body);
     res.json(ratting)
   })
+  app.get('/ratting', async (req, res) =>{
+    const curser = RattingCollection.find({});
+    const rating = await curser.toArray();
+    res.send(rating)
+  })
+  app.get('/ratting/showing', async (req, res) =>{
+   const curser = RattingCollection.find({});
+   const rating = await curser.toArray();
+   const query = rating.filter(rate => rate.show === "show");
+   res.send(query)
+  })
+  app.put('/ratting', async (req, res) =>{
+    const body = req.body;
+    console.log(body)
+    const filter = {_id : ObjectId(body._id)};
+    const updateDoc = {
+      $set: {
+        show : body.show
+      },
+    };
+    const result = await RattingCollection.updateOne(filter, updateDoc);
+    res.json(result)
+  })
 }
+
 finally{
   // await client.close();
 }
